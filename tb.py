@@ -1,6 +1,5 @@
 import numpy as np
-import ogr
-#            linestring_e = ogr.Geometry(ogr.wkbLineString)
+np.random.seed(4)
 
 def main():
     d = scrape_ac_transit()
@@ -16,7 +15,8 @@ def write_geojson(d):
     f = open('transbay.geojson','w')
     f.write('{ "type": "FeatureCollection","features": [')
     c=0
-    for bus_line, positions in d.iteritems():
+    for bus_line in sorted(d.keys()):
+        positions = d[bus_line]
         f.write(one_linestring(bus_line, positions, color=random_hex_color()))
         c += 1
         if (c<len(d.keys())): f.write(',')
@@ -71,7 +71,6 @@ def scrape_ac_transit():
                 if '<p>' in tmp: continue
                 if 'span' in tmp: continue
                 lat, lon = tmp.split(',')
-                print lat, lon
                 output[this_bus_line].append([float(lat), float(lon)])
             continue
 
@@ -79,19 +78,13 @@ def scrape_ac_transit():
         output[k] = np.array(v)
         if 'west' in k: output[k] = output[k][0:-1]
         if 'east' in k: output[k] = output[k][1:]
-    keys = output.keys()#tmpp
-    #output = {keys[0]:output[keys[0]], keys[1]:output[keys[1]], keys[2]:output[keys[2]]}#tmpp
     return output
         
 
 
 
 def random_hex_color():
-    from random import randint
-    #r,g,b = randint(0,255), randint(0,255), randint(0,255)
-    mmin=50
-    mmax=200
-    r,g,b = randint(mmin,mmax), randint(mmin,mmax), randint(mmin,mmax)
+    r,g,b = np.random.randint(50,200,3)
     return '#%02X%02X%02X' % (r,g,b)
 
 
